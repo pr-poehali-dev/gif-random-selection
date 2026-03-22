@@ -110,8 +110,8 @@ export default function GifViewer({ gifs, currentGif, onRandomSelect, onSelectGi
               <img
                 src={currentGif.url}
                 alt={currentGif.name}
-                className="w-full object-contain max-h-80 bg-black"
-                style={{ display: 'block' }}
+                className="w-full h-auto block bg-black"
+                style={{ maxHeight: '70vh', objectFit: 'contain' }}
               />
             </div>
             <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full">

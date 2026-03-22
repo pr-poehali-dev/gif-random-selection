@@ -30,14 +30,16 @@ export default function GifUpload({ gifs, onGifsChange, onSelectGif, selectedId 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [addToGroup, setAddToGroup] = useState(0);
 
+  const ALLOWED_TYPES = ['image/gif', 'image/png', 'image/jpeg', 'image/webp'];
+
   const handleFiles = useCallback((files: FileList, targetGroup = addToGroup) => {
     const newGifs: GifFile[] = [];
     Array.from(files).forEach(file => {
-      if (file.type === 'image/gif') {
+      if (ALLOWED_TYPES.includes(file.type)) {
         const url = URL.createObjectURL(file);
         newGifs.push({
           id: crypto.randomUUID(),
-          name: file.name.replace('.gif', ''),
+          name: file.name.replace(/\.(gif|png|jpe?g|webp)$/i, ''),
           url,
           size: file.size,
           groupId: targetGroup,
@@ -102,12 +104,12 @@ export default function GifUpload({ gifs, onGifsChange, onSelectGif, selectedId 
           <p className="font-rubik font-700 text-base text-foreground mb-0.5">
             {isDragging ? 'Отпускай!' : 'Добавить GIF'}
           </p>
-          <p className="text-muted-foreground text-xs">попадёт в группу 40% по умолчанию</p>
+          <p className="text-muted-foreground text-xs">GIF, PNG, JPG, WEBP · попадёт в группу 40%</p>
         </div>
         <input
           ref={fileInputRef}
           type="file"
-          accept=".gif,image/gif"
+          accept=".gif,.png,.jpg,.jpeg,.webp,image/gif,image/png,image/jpeg,image/webp"
           multiple
           className="hidden"
           onChange={e => e.target.files && handleFiles(e.target.files)}
