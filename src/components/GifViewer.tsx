@@ -1,12 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/ui/icon';
-
-interface GifFile {
-  id: string;
-  name: string;
-  url: string;
-  size: number;
-}
+import { GifFile, GROUPS } from '@/components/GifUpload';
 
 interface GifViewerProps {
   gifs: GifFile[];
@@ -17,11 +11,42 @@ interface GifViewerProps {
 
 const EMOJIS = ['🎲', '✨', '🎉', '⭐', '💥', '🔥', '🌟', '🎊'];
 
+const RARITY = [
+  {
+    groupId: 0,
+    label: 'Обычный',
+    style: { color: '#ffffff' },
+    className: '',
+  },
+  {
+    groupId: 1,
+    label: 'Редкий',
+    style: { color: '#60a5fa' },
+    className: '',
+  },
+  {
+    groupId: 2,
+    label: 'Эпический',
+    style: { color: '#c084fc' },
+    className: 'rarity-epic',
+  },
+  {
+    groupId: 3,
+    label: 'Легендарный',
+    style: {},
+    className: 'rarity-legendary',
+  },
+];
+
 export default function GifViewer({ gifs, currentGif, onRandomSelect, onSelectGif }: GifViewerProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [particles, setParticles] = useState<{ id: number; x: number; y: number; emoji: string }[]>([]);
   const btnRef = useRef<HTMLButtonElement>(null);
   const particleId = useRef(0);
+
+  const rarity = currentGif != null
+    ? RARITY.find(r => r.groupId === currentGif.groupId) ?? RARITY[0]
+    : null;
 
   const spawnParticles = () => {
     if (!btnRef.current) return;
@@ -78,7 +103,7 @@ export default function GifViewer({ gifs, currentGif, onRandomSelect, onSelectGi
       </div>
 
       {/* GIF Display */}
-      <div className="w-full px-4 flex-1 flex flex-col items-center justify-center gap-6">
+      <div className="w-full px-4 flex-1 flex flex-col items-center justify-center gap-4">
         {currentGif ? (
           <div className="relative w-full max-w-sm">
             <div className={`rounded-2xl overflow-hidden border-2 border-yellow-400/30 shadow-2xl glow-yellow ${isSpinning ? 'animate-scale-in' : ''}`}>
@@ -103,6 +128,18 @@ export default function GifViewer({ gifs, currentGif, onRandomSelect, onSelectGi
           </div>
         )}
 
+        {/* Rarity label */}
+        {rarity && currentGif && (
+          <div className="flex items-center justify-center h-8">
+            <span
+              className={`text-lg font-black tracking-widest uppercase ${rarity.className}`}
+              style={rarity.style}
+            >
+              {rarity.label}
+            </span>
+          </div>
+        )}
+
         {/* Random Button */}
         <button
           ref={btnRef}
@@ -112,7 +149,7 @@ export default function GifViewer({ gifs, currentGif, onRandomSelect, onSelectGi
         >
           <span className="flex items-center gap-3">
             <span className={isSpinning ? 'animate-spin' : ''}>🎲</span>
-            {isSpinning ? 'Крутим...' : 'СЛУЧАЙНЫЙ GIF!'}
+            {isSpinning ? 'Крутим...' : 'Испытать удачу'}
           </span>
         </button>
         <p className="text-muted-foreground text-xs">или нажми <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">Пробел</kbd></p>
