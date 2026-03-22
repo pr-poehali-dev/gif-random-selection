@@ -1,15 +1,8 @@
 import { useState, useCallback } from 'react';
 import Icon from '@/components/ui/icon';
 import GifViewer from '@/components/GifViewer';
-import GifUpload from '@/components/GifUpload';
+import GifUpload, { GifFile, GROUPS } from '@/components/GifUpload';
 import AppSettings from '@/components/AppSettings';
-
-interface GifFile {
-  id: string;
-  name: string;
-  url: string;
-  size: number;
-}
 
 interface Settings {
   username: string;
@@ -49,9 +42,28 @@ export default function Index() {
       pool = gifs;
     }
 
-    const random = pool[Math.floor(Math.random() * pool.length)];
-    setCurrentGif(random);
-    setLastUsed(prev => new Set([...prev, random.id]));
+    // Weighted random: pick group first by chance, then random gif from that group
+    const groupsWithGifs = GROUPS.filter(g => pool.some(gif => gif.groupId === g.id));
+
+    let picked: GifFile | null = null;
+
+    if (groupsWithGifs.length > 0) {
+      // Normalize weights to only groups that have GIFs
+      const totalWeight = groupsWithGifs.reduce((sum, g) => sum + g.chance, 0);
+      let rand = Math.random() * totalWeight;
+      let chosenGroup = groupsWithGifs[groupsWithGifs.length - 1];
+      for (const g of groupsWithGifs) {
+        rand -= g.chance;
+        if (rand <= 0) { chosenGroup = g; break; }
+      }
+      const groupPool = pool.filter(gif => gif.groupId === chosenGroup.id);
+      picked = groupPool[Math.floor(Math.random() * groupPool.length)];
+    } else {
+      picked = pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    setCurrentGif(picked);
+    setLastUsed(prev => new Set([...prev, picked!.id]));
     setTab('viewer');
   }, [gifs, settings.repeatAllowed, lastUsed]);
 
